@@ -903,7 +903,6 @@ rewriteIG_HammingFunctions (ProjectionOperator *newProj)
 //	}
 
 	//UNIQUE IG_INTEG ATTRIBUTES FROM L
-	// TODO: deal with CASE WHEN on the left attribute in the input query that fuses values, e.g., CASE WHEN with dayswaqi
 	FOREACH(AttributeReference, arL, cleanigAttrL)
 	{
 		List *cast = NIL;
@@ -1796,7 +1795,11 @@ rewriteIG_PatternGeneration (ProjectionOperator *sumrows)
 
 	FOREACH(AttributeDef, a, joinOp->schema->attrDefs)
 	{
-		if(!isSuffix(a->attrName, "1"))
+		//TODO: implement the subset of the other
+		char *attrRName = substr(a->attrName, 0, strlen(a->attrName) - 2);
+
+//		if(!isSuffix(a->attrName, "1"))
+		if(!searchListString(attrNamesClean, attrRName))
 		{
 			AttributeReference *ar = createFullAttrReference(a->attrName, 0,
 				getAttrPos((QueryOperator *) joinOp, a->attrName), 0, a->dataType);
@@ -2325,7 +2328,7 @@ rewriteIG_Projection (ProjectionOperator *op)
 					coalesce = createFunctionCall("COALESCE", LIST_MAKE(n, (Node *) createConstString("na")));
 
 				if(ar->attrType == DT_INT || ar->attrType == DT_FLOAT || ar->attrType == DT_LONG)
-					coalesce = createFunctionCall("COALESCE", LIST_MAKE(n, (Node *) createConstInt(0)));
+					coalesce = createFunctionCall("COALESCE", LIST_MAKE(n, (Node *) createConstInt(99999)));
 
 				newProjExprWithCaseWhen = appendToTailOfList(newProjExprWithCaseWhen, (Node *) coalesce);
 			}
@@ -2342,7 +2345,7 @@ rewriteIG_Projection (ProjectionOperator *op)
 					coalesce = createFunctionCall("COALESCE", LIST_MAKE(n, (Node *) createConstString("na")));
 
 				if(els->attrType == DT_INT || els->attrType == DT_FLOAT || els->attrType == DT_LONG)
-					coalesce = createFunctionCall("COALESCE", LIST_MAKE(n, (Node *) createConstInt(0)));
+					coalesce = createFunctionCall("COALESCE", LIST_MAKE(n, (Node *) createConstInt(99999)));
 			}
 			else
 			{
