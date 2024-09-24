@@ -44,6 +44,8 @@
 #define IG_PREFIX "ig_"
 #define VALUE_IG "value_"
 #define INTEG_SUFFIX "_integ"
+#define IG_RIGHT "right_"
+#define IG_LEFT "left_"
 #define ANNO_SUFFIX "_anno"
 #define HAMMING_PREFIX "hamming_"
 #define PATTERN_IG "pattern_IG"
@@ -521,30 +523,40 @@ rewriteIG_HammingFunctions (ProjectionOperator *newProj)
     HashMap *nameToIgAttrRef = NEW_MAP(Constant, Node);
 
     // collect corresponding attributes of owned data
-    int pos = 0;
+//    int pos = 0;
 
     FOREACH(AttributeDef,a,attrL)
 	{
     	if(isPrefix(a->attrName,IG_PREFIX))
     	{
     		//TODO: search corresponding attributes
-    		AttributeDef *ar = (AttributeDef *) getNthOfListP(attrR,pos);
-    		char *corrAttrName = ar->attrName;
+//    		AttributeDef *ar = (AttributeDef *) getNthOfListP(attrR,pos);
+//    		char *corrAttrName = ar->attrName;
+    		char *leftIgName = replaceSubstr(a->attrName, IG_LEFT, "");
 
-    		// store the corresponding ig attribute names in shared
-    		Node *arRef = (Node *) getAttrRefByName((QueryOperator *) child, corrAttrName);
-    		MAP_ADD_STRING_KEY(nameToIgAttrOpp, a->attrName, arRef);
+			FOREACH(AttributeDef, adr, attrR)
+    		{
+				char *rightIgName = replaceSubstr(adr->attrName, IG_RIGHT, "");
+
+				if(streq(leftIgName, rightIgName))
+				{
+		    		// store the corresponding ig attribute names in shared
+//		    		Node *arRef = (Node *) getAttrRefByName((QueryOperator *) child, corrAttrName);
+					Node *arRef = (Node *) getAttrRefByName((QueryOperator *) child, adr->attrName);
+		    		MAP_ADD_STRING_KEY(nameToIgAttrOpp, a->attrName, arRef);
+				}
+    		}
 
     		// store the ig attributes' reference
     		Node *aRef = (Node *) getAttrRefByName((QueryOperator *) child, a->attrName);
 			MAP_ADD_STRING_KEY(nameToIgAttrRef, a->attrName, aRef);
     	}
 
-    	pos++;
+//    	pos++;
 	}
 
     // collect corresponding attributes of shared data
-    pos = 0;
+//    pos = 0;
 
     FOREACH(AttributeDef,a,attrR)
 	{
@@ -552,28 +564,38 @@ rewriteIG_HammingFunctions (ProjectionOperator *newProj)
     	{
 
 			//TODO: search corresponding attributes
-			AttributeDef *al = (AttributeDef *) getNthOfListP(attrL,pos);
-			char *corrAttrName = al->attrName;
+//			AttributeDef *al = (AttributeDef *) getNthOfListP(attrL,pos);
+//			char *corrAttrName = al->attrName;
+    		char *rightIgName = replaceSubstr(a->attrName, IG_RIGHT, "");
 
-			// store the corresponding ig attribute names in shared
-			Node *alRef = (Node *) getAttrRefByName((QueryOperator *) child, corrAttrName);
-			MAP_ADD_STRING_KEY(nameToIgAttrOpp, a->attrName, alRef);
+    		FOREACH(AttributeDef, adl, attrL)
+			{
+				char *leftIgName = replaceSubstr(adl->attrName, IG_LEFT, "");
+
+				if(streq(leftIgName, rightIgName))
+				{
+					// store the corresponding ig attribute names in shared
+//					Node *alRef = (Node *) getAttrRefByName((QueryOperator *) child, corrAttrName);
+					Node *alRef = (Node *) getAttrRefByName((QueryOperator *) child, adl->attrName);
+					MAP_ADD_STRING_KEY(nameToIgAttrOpp, a->attrName, alRef);
+				}
+			}
 
 			// store the ig attributes' reference
 			Node *aRef = (Node *) getAttrRefByName((QueryOperator *) child, a->attrName);
 			MAP_ADD_STRING_KEY(nameToIgAttrRef, a->attrName, aRef);
     	}
 
-    	pos++;
+//    	pos++;
 	}
 
 
     // create provenance columns using case when
     List *commonAttrNamesR = (List *) GET_STRING_PROP((QueryOperator *) newProj, IG_PROP_NON_JOIN_COMMON_ATTR_R);
-	List *joinAttrNames = (List *) GET_STRING_PROP((QueryOperator *) newProj, IG_PROP_JOIN_ATTR);
+//	List *joinAttrNames = (List *) GET_STRING_PROP((QueryOperator *) newProj, IG_PROP_JOIN_ATTR);
 	List *joinAttrNamesR = (List *) GET_STRING_PROP((QueryOperator *) newProj, IG_PROP_JOIN_ATTR_R);
 	List *newProjExprs = NIL;
-	pos = 0;
+	int pos = 0;
 
     FOREACH(AttributeDef, a, newProj->op.schema->attrDefs)
     {
@@ -591,38 +613,56 @@ rewriteIG_HammingFunctions (ProjectionOperator *newProj)
     	{
     		if(isSuffix(a->attrName,INTEG_SUFFIX))
     		{
+    			/*
+    			 *  As long as its suffix is "_integ", the attributes must be input to the hamming computation.
+    			 *  Because conversion already takes care of what attributes should be the input to the hamming computation.
+    			 */
         		if(isA(n, AttributeReference))
         		{
         			origIgInteg = (AttributeReference *) n;
-            		char *igOrigNameInteg = origIgInteg->name;
+//            		char *igOrigNameInteg = origIgInteg->name; //not used
+            		char *igOrigNameWithoutInteg = replaceSubstr(origIgInteg->name, INTEG_SUFFIX, "");
 
-            		if(MAP_HAS_STRING_KEY(nameToIgAttrOpp, igOrigNameInteg))
+            		if(MAP_HAS_STRING_KEY(nameToIgAttrOpp, igOrigNameWithoutInteg))
         			{
         				AttributeReference *corrIgExpr =
-        						(AttributeReference *) MAP_GET_STRING(nameToIgAttrOpp, igOrigNameInteg);
+        						(AttributeReference *) MAP_GET_STRING(nameToIgAttrOpp, igOrigNameWithoutInteg);
 
         				// for join attributes
-        				if(searchListNode(joinAttrNames, (Node *) createConstString(igOrigNameInteg)))
-        				{
+        				// TODO: creating constant depends on the data type of igOrigNameInteg
+//        				if(searchListNode(joinAttrNames, (Node *) createConstString(igOrigNameInteg)))
+//        				if(searchListNode(joinAttrNames, (Node *) a))
+//        				{
+        					// Same here. Falling into this case means that the attribute is not join attribute and is coming from shared
         					cond = (Node *) createIsNullExpr((Node *) origIgInteg);
         					then = (Node *) corrIgExpr;
         					els = (Node *) origIgInteg;
 
         					caseWhen = createCaseWhen(cond, then);
         					caseExpr = createCaseExpr(NULL, singleton(caseWhen), els);
-        				}
-        				else
-        				{
-							cond = (Node *) createIsNullExpr((Node *) origIgInteg);
-							then = (Node *) createCastExpr((Node *) createConstInt(0), DT_BIT10);
-							els = (Node *) origIgInteg;
-
-							caseWhen = createCaseWhen(cond, then);
-							caseExpr = createCaseExpr(NULL, singleton(caseWhen), els);
-        				}
-
-        				newProjExprs = appendToTailOfList(newProjExprs,caseExpr);
+//        				}
+//        				else
+//        				{
+//							cond = (Node *) createIsNullExpr((Node *) origIgInteg);
+//							then = (Node *) createCastExpr((Node *) createConstInt(0), DT_BIT10);
+//							els = (Node *) origIgInteg;
+//
+//							caseWhen = createCaseWhen(cond, then);
+//							caseExpr = createCaseExpr(NULL, singleton(caseWhen), els);
+//        				}
         			}
+            		else // if the corresponding ig attribute does not exist
+            		{
+						cond = (Node *) createIsNullExpr((Node *) origIgInteg);
+						then = (Node *) createCastExpr((Node *) createConstInt(0), DT_BIT10);
+						els = (Node *) origIgInteg;
+
+						caseWhen = createCaseWhen(cond, then);
+						caseExpr = createCaseExpr(NULL, singleton(caseWhen), els);
+            		}
+
+            		newProjExprs = appendToTailOfList(newProjExprs,caseExpr);
+
         		}
         		else
         	    	newProjExprs = appendToTailOfList(newProjExprs,n);
@@ -635,8 +675,10 @@ rewriteIG_HammingFunctions (ProjectionOperator *newProj)
         		char *igOrigNameInteg = origIgInteg->name;
 
         		// ig attributes from shared
-        		if(searchListNode(commonAttrNamesR, (Node *) createConstString(igOrigNameInteg)) ||
-        				searchListNode(joinAttrNamesR, (Node *) createConstString(igOrigNameInteg)))
+//        		if(searchListNode(commonAttrNamesR, (Node *) createConstString(igOrigNameInteg)) ||
+//        				searchListNode(joinAttrNamesR, (Node *) createConstString(igOrigNameInteg)))
+				if(searchListNode(commonAttrNamesR, (Node *) a) ||
+						searchListNode(joinAttrNamesR, (Node *) a))
         		{
         			AttributeReference *corrIgExpr =
         					(AttributeReference *) MAP_GET_STRING(nameToIgAttrOpp, igOrigNameInteg);
@@ -703,13 +745,14 @@ rewriteIG_HammingFunctions (ProjectionOperator *newProj)
 	}
 
 
-	List *igAttrL = NIL;
-	List *cleanigAttrR = NIL;
+	List *igAttrL = NIL; // ig_left
+	List *cleanigAttrL = NIL; // ig_left_integ
+	List *cleanigAttrR = NIL; // ig_right_integ
 
 	//input query attributes
 	List *origAttrs = NIL;
 
-	//original attributes
+	//original attribute references
 	FOREACH(AttributeDef, n, newProj->op.schema->attrDefs)
 	{
 		if(!isPrefix(n->attrName, IG_PREFIX))
@@ -723,109 +766,192 @@ rewriteIG_HammingFunctions (ProjectionOperator *newProj)
 	{
 		if(isPrefix(n->attrName, IG_PREFIX))
 		{
-			if (isSubstr(n->attrName, "left") != FALSE && !isSuffix(n->attrName, INTEG_SUFFIX) &&
-					isSubstr(n->attrName, "right") == FALSE)
+			if(isSuffix(n->attrName, INTEG_SUFFIX))
 			{
-				FOREACH(AttributeReference, ar, origAttrs)
+				if(isSubstr(n->attrName, IG_RIGHT))
 				{
-					if(isSubstr(n->attrName, ar->name) == TRUE)
-					{
-						AttributeReference *ar = getAttrRefByName((QueryOperator *) newProj, n->attrName);
-						igAttrL = appendToTailOfList(igAttrL, ar);
-					}
+					AttributeReference *arInteg = getAttrRefByName((QueryOperator *) newProj, n->attrName);
+					cleanigAttrR = appendToTailOfList(cleanigAttrR, arInteg);
+				}
+
+				if(isSubstr(n->attrName, IG_LEFT))
+				{
+					AttributeReference *arl = getAttrRefByName((QueryOperator *) newProj, n->attrName);
+					cleanigAttrL = appendToTailOfList(cleanigAttrL, arl);
+				}
+			}
+			else
+			{
+				if(isSubstr(n->attrName, IG_LEFT))
+				{
+					AttributeReference *arl = getAttrRefByName((QueryOperator *) newProj, n->attrName);
+					igAttrL = appendToTailOfList(igAttrL, arl);
 				}
 			}
 
-			if (isSubstr(n->attrName, "integ") == TRUE)
-			{
-				FOREACH(AttributeReference, ar, origAttrs)
-				{
-					if(isSubstr(n->attrName, ar->name) == TRUE)
-					{
-						AttributeReference *arn = getAttrRefByName((QueryOperator *) newProj, n->attrName);
-						cleanigAttrR = appendToTailOfList(cleanigAttrR, arn);
-					}
-				}
-			}
+//			if (isSubstr(n->attrName, "left") && !isSuffix(n->attrName, INTEG_SUFFIX)
+////					&& isSubstr(n->attrName, "right") == FALSE
+//			)
+//			{
+//				FOREACH(AttributeReference, ar, origAttrs)
+//				{
+//					if(isSubstr(n->attrName, ar->name) == TRUE)
+//					{
+//						AttributeReference *ar = getAttrRefByName((QueryOperator *) newProj, n->attrName);
+//						igAttrL = appendToTailOfList(igAttrL, ar);
+//					}
+//				}
+//			}
+//
+//			if (isSubstr(n->attrName, "integ") == TRUE)
+//			{
+//				FOREACH(AttributeReference, ar, origAttrs)
+//				{
+//					if(isSubstr(n->attrName, ar->name) == TRUE)
+//					{
+//						AttributeReference *arn = getAttrRefByName((QueryOperator *) newProj, n->attrName);
+//						cleanigAttrR = appendToTailOfList(cleanigAttrR, arn);
+//					}
+//				}
+//			}
 		}
 	}
 
-	List *igAttrR = removeDupeAr(cleanigAttrR);
-	int LL = LIST_LENGTH(igAttrL);
-	int RR = LIST_LENGTH(igAttrR);
-	int lend = 1;
-	int rend = 1;
+//	List *igAttrR = removeDupeAr(cleanigAttrR);
+//	int LL = LIST_LENGTH(igAttrL);
+//	int RR = LIST_LENGTH(igAttrR);
+//	int lend = 1;
+//	int rend = 1;
 
 	// 1. hamming function for all same/common attributes first
 	// 2. renaming the attribute names || Keeping the table Names for now
 
-	FOREACH(AttributeReference, arR, igAttrR)
+	FOREACH(AttributeReference, arR, cleanigAttrR)
 	{
-		List *cast = NIL;
-		lend = 1;
-		FOREACH(AttributeReference, arL, igAttrL)
-		{
-			//FOR SAME ATTRIBUTES
-			if(isSubstr(arR->name, arL->name) == TRUE)
-			{
-				CastExpr *castL;
-				CastExpr *castR;
-				castL = createCastExpr((Node *) arL, DT_STRING);
-				castR = createCastExpr((Node *) arR, DT_STRING);
-				cast = LIST_MAKE(castL, castR);
-				FunctionCall *hammingdist = createFunctionCall("hammingxor", cast);
-				exprs = appendToTailOfList(exprs,hammingdist);
-				char *name = CONCAT_STRINGS(HAMMING_PREFIX, substr(arR->name, 8 , strlen(arR->name) - 1));
-				atNames = appendToTailOfList(atNames, name);
-				break;
-			}
-			//UNIQUE ATTRIBUTES FROM R
-			else if(lend >= LL)
-			{
-				CastExpr *castR;
-				castR = createCastExpr((Node *) arR, DT_STRING);
-				cast = LIST_MAKE(createConstString("0000000000"), castR);
-				FunctionCall *hammingdist = createFunctionCall("hammingxor", cast);
-				exprs = appendToTailOfList(exprs,hammingdist);
-				char *name = CONCAT_STRINGS(HAMMING_PREFIX, substr(arR->name, 8 , strlen(arR->name) - 1));
-				atNames = appendToTailOfList(atNames, name);
-			}
-			else
-			{
-				lend = lend + 1;
-			}
+		List* cast = NIL;
+		char* arRname = replaceSubstr(arR->name, INTEG_SUFFIX, "");
 
+		if(MAP_HAS_STRING_KEY(nameToIgAttrOpp, arRname))
+		{
+			CastExpr *castL;
+			CastExpr *castR;
+
+			AttributeReference *ar = (AttributeReference *) MAP_GET_STRING(nameToIgAttrOpp, arRname);
+			AttributeReference *arL = getAttrRefByName((QueryOperator *) newProj, ar->name);
+
+			castL = createCastExpr((Node *) arL, DT_STRING);
+			castR = createCastExpr((Node *) arR, DT_STRING);
+			cast = LIST_MAKE(castL, castR);
+
+			FunctionCall *hammingdist = createFunctionCall("hammingxor", cast);
+			exprs = appendToTailOfList(exprs, hammingdist);
+
+			char *name = CONCAT_STRINGS(HAMMING_PREFIX, substr(arR->name, 8 , strlen(arR->name) - 1));
+			atNames = appendToTailOfList(atNames, name);
+		}
+		else
+		{
+			CastExpr *castR = createCastExpr((Node *) arR, DT_STRING);
+			cast = LIST_MAKE(createConstString("0000000000"), castR);
+
+			FunctionCall *hammingdist = createFunctionCall("hammingxor", cast);
+			exprs = appendToTailOfList(exprs,hammingdist);
+
+			char *name = CONCAT_STRINGS(HAMMING_PREFIX, substr(arR->name, 8 , strlen(arR->name) - 1));
+			atNames = appendToTailOfList(atNames, name);
 		}
 	}
 
-	//UNIQUE ATTRIBUTES FROM L
-	FOREACH(AttributeReference, arL, igAttrL)
+// OUTDATED CODES
+//	FOREACH(AttributeReference, arR, igAttrR)
+//	{
+//		List *cast = NIL;
+//		lend = 1;
+//		FOREACH(AttributeReference, arL, igAttrL)
+//		{
+//			//FOR SAME ATTRIBUTES
+//			if(isSubstr(arR->name, arL->name) == TRUE)
+//			{
+//				CastExpr *castL;
+//				CastExpr *castR;
+//				castL = createCastExpr((Node *) arL, DT_STRING);
+//				castR = createCastExpr((Node *) arR, DT_STRING);
+//				cast = LIST_MAKE(castL, castR);
+//				FunctionCall *hammingdist = createFunctionCall("hammingxor", cast);
+//				exprs = appendToTailOfList(exprs,hammingdist);
+//				char *name = CONCAT_STRINGS(HAMMING_PREFIX, substr(arR->name, 8 , strlen(arR->name) - 1));
+//				atNames = appendToTailOfList(atNames, name);
+//				break;
+//			}
+//			//UNIQUE ATTRIBUTES FROM R
+//			else if(lend >= LL)
+//			{
+//				CastExpr *castR;
+//				castR = createCastExpr((Node *) arR, DT_STRING);
+//				cast = LIST_MAKE(createConstString("0000000000"), castR);
+//				FunctionCall *hammingdist = createFunctionCall("hammingxor", cast);
+//				exprs = appendToTailOfList(exprs,hammingdist);
+//				char *name = CONCAT_STRINGS(HAMMING_PREFIX, substr(arR->name, 8 , strlen(arR->name) - 1));
+//				atNames = appendToTailOfList(atNames, name);
+//			}
+//			else
+//			{
+//				lend = lend + 1;
+//			}
+//
+//		}
+//	}
+
+	//UNIQUE IG_INTEG ATTRIBUTES FROM L
+	// TODO: deal with CASE WHEN on the left attribute in the input query that fuses values, e.g., CASE WHEN with dayswaqi
+	FOREACH(AttributeReference, arL, cleanigAttrL)
 	{
 		List *cast = NIL;
-		rend = 1;
-		FOREACH(AttributeReference, arR, igAttrR)
+
+		FOREACH(AttributeReference, arLOrig, igAttrL)
 		{
-			if(isSubstr(arR->name, arL->name) == TRUE)
+			if(isSubstr(arL->name, arLOrig->name))
 			{
-				break;
-			}
-			else if(rend >= RR)
-			{
-				CastExpr *castL;
-				castL = createCastExpr((Node *) arL, DT_STRING);
-				cast = LIST_MAKE(createConstString("0000000000"), castL);
+				CastExpr *castL = createCastExpr((Node *) arLOrig, DT_STRING);
+				CastExpr *castR = createCastExpr((Node *) arL, DT_STRING);
+				cast = LIST_MAKE(castL, castR);
+
 				FunctionCall *hammingdist = createFunctionCall("hammingxor", cast);
-				exprs = appendToTailOfList(exprs,hammingdist);
+				exprs = appendToTailOfList(exprs, hammingdist);
+
 				char *name = CONCAT_STRINGS(HAMMING_PREFIX, substr(arL->name, 8 , strlen(arL->name) - 1));
 				atNames = appendToTailOfList(atNames, name);
 			}
-			else
-			{
-				rend = rend + 1;
-			}
-
 		}
 	}
+
+//	FOREACH(AttributeReference, arL, igAttrL)
+//	{
+//		List *cast = NIL;
+//		rend = 1;
+//		FOREACH(AttributeReference, arR, igAttrR)
+//		{
+//			if(isSubstr(arR->name, arL->name) == TRUE)
+//			{
+//				break;
+//			}
+//			else if(rend >= RR)
+//			{
+//				CastExpr *castL;
+//				castL = createCastExpr((Node *) arL, DT_STRING);
+//				cast = LIST_MAKE(createConstString("0000000000"), castL);
+//				FunctionCall *hammingdist = createFunctionCall("hammingxor", cast);
+//				exprs = appendToTailOfList(exprs,hammingdist);
+//				char *name = CONCAT_STRINGS(HAMMING_PREFIX, substr(arL->name, 8 , strlen(arL->name) - 1));
+//				atNames = appendToTailOfList(atNames, name);
+//			}
+//			else
+//			{
+//				rend = rend + 1;
+//			}
+//
+//		}
+//	}
 
 	ProjectionOperator *hamming_op = createProjectionOp(exprs, NULL, NIL, atNames);
 
@@ -2261,33 +2387,47 @@ rewriteIG_Projection (ProjectionOperator *op)
     {
     	if(!isPrefix(a->attrName,IG_PREFIX) && !isSuffix(a->attrName,"_anno"))
     	{
-        	char *igName = CONCAT_STRINGS("ig_conv_",
-        			MAP_HAS_STRING_KEY(attrLNames, a->attrName) ? tblNameL : tblNameR, a->attrName);
-
             if(MAP_HAS_STRING_KEY(attrLNames, a->attrName) &&
             		MAP_HAS_STRING_KEY(attrRNames, a->attrName))
         	{
-    			char *igNameR = CONCAT_STRINGS("ig_conv_",
-						MAP_HAS_STRING_KEY(attrLNames, a->attrName) ? tblNameR : tblNameL, a->attrName);
+            	char *igName = CONCAT_STRINGS("ig_conv_",
+    //        			MAP_HAS_STRING_KEY(attrLNames, a->attrName) ? tblNameL : tblNameR,
+            			MAP_HAS_STRING_KEY(attrLNames, a->attrName) ? "left_" : "right_",
+            					a->attrName);
 
-    			Constant *constIgName = createConstString(igName);
-				Constant *constIgNameR = createConstString(igNameR);
+    			char *igNameR = CONCAT_STRINGS("ig_conv_",
+//						MAP_HAS_STRING_KEY(attrLNames, a->attrName) ? tblNameR : tblNameL,
+    					MAP_HAS_STRING_KEY(attrRNames, a->attrName) ? "right_" : "left_",
+								a->attrName);
+
+    			//TODO: no need to store them as constant
+//    			Constant *constIgName = createConstString(igName);
+//				Constant *constIgNameR = createConstString(igNameR);
+
+    			// store join attributes as IG attributes
+    			AttributeDef *adlIg = (AttributeDef *) copyObject(MAP_GET_STRING(attrLNames, a->attrName));
+    			adlIg->attrName = igName;
+    			adlIg->dataType = DT_BIT10;
+
+    			AttributeDef *adrIg = (AttributeDef *) copyObject(MAP_GET_STRING(attrRNames, a->attrName));
+    			adrIg->attrName = igNameR;
+    			adrIg->dataType = DT_BIT10;
 
             	if(!searchListString(joinAttrs, a->attrName))
         		{
-        			if(!searchListNode(commonAttrNames, (Node *) constIgName))
-        				commonAttrNames = appendToTailOfList(commonAttrNames, constIgName);
+        			if(!searchListNode(commonAttrNames, (Node *) adlIg))
+        				commonAttrNames = appendToTailOfList(commonAttrNames, adlIg);
 
-        			if(!searchListNode(commonAttrNamesR, (Node *) constIgNameR))
-            			commonAttrNamesR = appendToTailOfList(commonAttrNamesR, constIgNameR);
+        			if(!searchListNode(commonAttrNamesR, (Node *) adrIg))
+            			commonAttrNamesR = appendToTailOfList(commonAttrNamesR, adrIg);
         		}
         		else
         		{
-        			if(!searchListNode(joinAttrNames, (Node *) constIgName))
-        				joinAttrNames = appendToTailOfList(joinAttrNames, constIgName);
+        			if(!searchListNode(joinAttrNames, (Node *) adlIg))
+        				joinAttrNames = appendToTailOfList(joinAttrNames, adlIg);
 
-					if(!searchListNode(joinAttrNamesR, (Node *) constIgNameR))
-            			joinAttrNamesR = appendToTailOfList(joinAttrNamesR, constIgNameR);
+					if(!searchListNode(joinAttrNamesR, (Node *) adrIg))
+            			joinAttrNamesR = appendToTailOfList(joinAttrNamesR, adrIg);
         		}
         	}
     	}
@@ -2515,30 +2655,39 @@ rewriteIG_Join (JoinOperator *op)
 	List *joinExprs = getAttrReferences((Node *) op);
 
 //	Sending IG join type in IG_JOIN_TYPE to table access
-	AttributeReference *jt = NULL;
-	if(op->joinType == 0)
+//	AttributeReference *jt = NULL;
+	Constant *joinType = NULL;
+	if(op->joinType == JOIN_INNER)
 	{
-		jt = createFullAttrReference("INNER_JOIN", 0, 0, 0, DT_STRING);
+//		jt = createFullAttrReference("INNER_JOIN", 0, 0, 0, DT_STRING);
+		joinType = createConstString("INNER_JOIN");
 	}
-	else if(op->joinType == 1)
+	else if(op->joinType == JOIN_CROSS)
 	{
-		jt = createFullAttrReference("CROSS_JOIN", 0, 0, 0, DT_STRING);
+//		jt = createFullAttrReference("CROSS_JOIN", 0, 0, 0, DT_STRING);
+		joinType = createConstString("CROSS_JOIN");
 	}
-	else if(op->joinType == 2)
+	else if(op->joinType == JOIN_LEFT_OUTER)
 	{
-		jt = createFullAttrReference("LEFT_OUTER_JOIN", 0, 0, 0, DT_STRING);
+//		jt = createFullAttrReference("LEFT_OUTER_JOIN", 0, 0, 0, DT_STRING);
+		joinType = createConstString("LEFT_OUTER_JOIN");
 	}
-	else if(op->joinType == 3)
+	else if(op->joinType == JOIN_RIGHT_OUTER)
 	{
-		jt = createFullAttrReference("RIGHT_OUTER_JOIN", 0, 0, 0, DT_STRING);
+//		jt = createFullAttrReference("RIGHT_OUTER_JOIN", 0, 0, 0, DT_STRING);
+		joinType = createConstString("RIGHT_OUTER_JOIN");
 	}
-	else if(op->joinType == 4)
+	else if(op->joinType == JOIN_FULL_OUTER)
 	{
-		jt = createFullAttrReference("FULL_OUTER_JOIN", 0, 0, 0, DT_STRING);
+//		jt = createFullAttrReference("FULL_OUTER_JOIN", 0, 0, 0, DT_STRING);
+		joinType = createConstString("FULL_OUTER_JOIN");
 	}
 
-	SET_STRING_PROP(lChild, IG_JOIN_TYPE, jt);
-	SET_STRING_PROP(rChild, IG_JOIN_TYPE, jt);
+//	SET_STRING_PROP(lChild, IG_JOIN_TYPE, jt);
+//	SET_STRING_PROP(rChild, IG_JOIN_TYPE, jt);
+
+	SET_STRING_PROP(lChild, IG_JOIN_TYPE, joinType);
+	SET_STRING_PROP(rChild, IG_JOIN_TYPE, joinType);
 
 	SET_STRING_PROP(lChild, IG_JOIN_PROP, joinExprs);
 	SET_STRING_PROP(rChild, IG_JOIN_PROP, joinExprs);
@@ -2742,7 +2891,8 @@ rewriteIG_TableAccess(TableAccessOperator *op)
 	List *joinattrs = (List *) GET_STRING_PROP((QueryOperator *) op, IG_JOIN_PROP);
 	List *left_attrs = (List *) GET_STRING_PROP((QueryOperator *) op, IG_L_PROP);
 	List *right_attrs = (List *) GET_STRING_PROP((QueryOperator *) op, IG_R_PROP);
-	AttributeReference *joinType = (AttributeReference *) GET_STRING_PROP((QueryOperator *) op, IG_JOIN_TYPE);
+//	AttributeReference *joinType = (AttributeReference *) GET_STRING_PROP((QueryOperator *) op, IG_JOIN_TYPE);
+	Constant *joinType = (Constant *) GET_STRING_PROP((QueryOperator *) op, IG_JOIN_TYPE);
 
     FOREACH(AttributeReference, ar, input_attrs)
     {
@@ -2957,16 +3107,20 @@ rewriteIG_TableAccess(TableAccessOperator *op)
 		FOREACH(AttributeReference, ar, cleanL)
 		{
 			//removing the join condition attributes
-			if(searchArList(joinattrs, ar->name) == 1)
-			{
-				continue;
-			}
-			//removing the attributes from left list that do not exist in the right list
-			else if(searchArList(cleanR, ar->name) == 0)
-			{
-				continue;
-			}
-			else if((searchArList(joinattrs, ar->name) == 0) && (searchArList(cleanR, ar->name) == 1))
+//			if(searchArList(joinattrs, ar->name) == 1)
+//			{
+//				continue;
+//			}
+//			//removing the attributes from left list that do not exist in the right list
+//			else if(searchArList(cleanR, ar->name) == 0)
+//			{
+//				continue;
+//			}
+//			else
+			if((searchArList(joinattrs, ar->name) == 0)
+					&& (searchArList(cleanR, ar->name) == 1))
+//			if((!searchListNode(joinattrs, (Node *) ar))
+//					&& (searchListNode(cleanR, (Node *) ar)))
 			{
 				newProjExpr = appendToTailOfList(newProjExpr, ar);
 				newProjNames = appendToTailOfList(newProjNames, ar->name);
@@ -3077,8 +3231,8 @@ rewriteIG_TableAccess(TableAccessOperator *op)
 
 	//cleanL and cleanR have the input query attributes
 	// adding the join attributes if its a FULL OUTER JOIN OR RIGHT OUTER JOIN
-	if((strcmp(joinType->name, "FULL_OUTER_JOIN") == 0) ||
-			(strcmp(joinType->name, "RIGHT_OUTER_JOIN") == 0))
+	if((streq(STRING_VALUE(joinType), "FULL_OUTER_JOIN")) ||
+			(streq(STRING_VALUE(joinType), "RIGHT_OUTER_JOIN")))
 	{
 		FOREACH(AttributeReference, ar, joinattrs1)
 		{
