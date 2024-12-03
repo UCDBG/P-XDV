@@ -1,0 +1,261 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PEDS: Ask for Price and Explanations for Data Sharing</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- <title>Database Operations</title>-->
+    <style>
+        /* Set display to none for image*/
+        #image {
+            display: none;
+        }
+        #image-ig {
+            display: none;
+        }
+        #image-expl {
+            display: none;
+        }
+    </style>
+</head>
+<!-- <body onload="submit()"> -->
+<body>
+    <header>
+        <h1>PEDS: Ask for Price and Explanations for Data Sharing</h1>
+    </header>
+    <main>
+         <form id="submitForm" action="/" method="GET">
+        <div>
+            <label for="queryInput">Query Input:</label>
+            <input type="text" id="queryInput" name="query" placeholder="Type your SQL query here">
+
+            <label for="tableSelect">Select Table:</label>
+            <select id="tableSelect">
+                <option value="owned">Owned</option>
+                <option value="shared">Shared</option>
+            </select>
+        
+            <label for="columnsSelect">Select Columns:</label>
+            <select id="columnsSelect" multiple>
+                <option value="county">county</option>
+                <option value="year">year</option>
+                <option value="dayswaqi">dayswaqi</option>
+                <option value="gdays">gdays</option>
+                <option value="maqi">maqi</option>
+            </select>
+        
+            <label for="conditionInput">Add Condition (e.g., s.maqi > 100):</label>
+            <input type="text" id="conditionInput" placeholder="Enter WHERE condition">
+        
+            <label for="joinSelect">Join With:</label>
+            <select id="joinSelect">
+                <option value="">None</option>
+                <option value="INNER JOIN">INNER JOIN</option>
+                <option value="LEFT JOIN">LEFT JOIN</option>
+                <option value="RIGHT JOIN">RIGHT JOIN</option>
+                <option value="FULL OUTER JOIN">FULL OUTER JOIN</option>
+            </select>
+        
+            <label for="onConditionInput">ON Condition (if joining tables):</label>
+            <input type="text" id="onConditionInput" placeholder="Enter ON condition for join">
+        
+            <button onclick="generateQuery()">Generate SQL Query</button>
+        
+
+
+            <label for="kInput">Num of Patterns for Explanations:</label>
+            <input type="number" id="kInput" name="topk" value="topK" placeholder="Enter K">
+            <button type="submit" name="action" value="query">Execute SQL Query</button>
+            <button type="submit" name="action" value="IGscript" id="generateButtonIG"  onclick="show()">Estimate Price</button>
+            <button type="submit" name="action" value="EXPLscript" id="generateButtonIGEXPL" onclick="show2()">Generate Explaination</button>
+            <!-- <button type="button" onclick="show()" id="generateGraphBtn">Generate Graph</button> -->
+        </div>
+       
+
+          <!-- <button onclick="generatePricing()">Generate Pricing Data</button> -->
+        <!-- <button type="button" onclick="executeQuery('query')">Execute SQL Query</button> -->
+          
+       <!-- <div id="queryResult"></div>-->
+        
+            <!-- ... remaining HTML content ... -->
+            <div class="container">
+                <div class="pane" id="pane1">        
+                    <!--<h2>Graph</h2>-->
+                    <img id="image-ig" src="/output_plot.png" alt="Graph Image" class="img">
+                    <img id="image-expl" src="/output_plotexpl.png" alt="Graph Image" class="img">
+                    <!-- Content for the first pane -->
+                  <!--  <div id="dataScheme">
+                        <h3>Data Scheme:</h3>
+                    </div> -->
+                    <!-- Add your content here -->
+                    <div id="igTrendContainer">                        
+                    </div>
+                </div>
+             <div class="pane" id="pane2">
+                <!-- Content for the second pane -->
+                <div class="nested-pane" id="nestedPane1">
+                    <!-- Content for the first nested pane in Pane 2 -->
+                   <!-- <h2>Owned data:</h2>-->
+                    <div id="ownedContainer">
+                        <!-- Owned table schema will be dynamically inserted here -->
+                    </div>
+                     <!--<div id="dataUpload">
+                        <input type="file" id="fileInput" accept=".csv">
+                        <button onclick="uploadData()">Upload Data</button>
+                    </div> -->
+                    <!-- Add your content here -->
+                </div>
+                <div class="nested-pane" id="nestedPane2">
+                    <!-- Content for the second nested pane in Pane 2 -->
+                    <div id="sharedContainer">
+                        <!-- <div id="dataUpload">
+                        <input type="file" id="fileInput" accept=".csv">
+                        <button onclick="uploadData()">Upload Data</button>-->
+                    </div> 
+                    <!-- Add your content here -->
+                </div>
+            </div>  
+            <!-- Result section -->
+         <div id="resultSection"></div> 
+        
+    </main>
+    <!--<button id="generateGraphBtn">Generate Graph</button> 
+    <div id="graphContainer">
+        <img id="graphImage" src="" alt="Generated Graph">   </div>-->
+    <!-- <div class="container2">
+        <div id="graph">
+            <img id="image" src="/output_plot.png" alt="Graph Image" class="img">
+        </div>
+    </div> -->
+<!--     <footer>
+        <p>&copy; 2024 Your Website Name. All rights reserved.</p>
+    </footer> -->
+    <script>
+      // JavaScript function to fetch owned table schema and insert it into the container
+        async function fetchOwnedTableSchema() {
+            try {
+                const response = await fetch('/owned-table-schema');
+                const ownedTableSchema = await response.text();
+                document.getElementById('ownedContainer').innerHTML = ownedTableSchema;
+            } catch (error) {
+                console.error('Error fetching owned table schema:', error);
+            }
+        }
+
+        // // JavaScript function to run owned query
+        // function runOwnedQuery() {
+        //     window.location.href = '/?query=' + encodeURIComponent('${ownedText}');
+        // }
+
+        // JavaScript function to fetch owned table schema and insert it into the container
+        async function fetchSharedTableSchema() {
+            try {
+                const response = await fetch('/shared-table-schema');
+                const sharedTableSchema = await response.text();
+                document.getElementById('sharedContainer').innerHTML = sharedTableSchema;
+            } catch (error) {
+                console.error('Error fetching shared table schema:', error);
+            }
+        }
+
+        // // JavaScript function to run owned query
+        // function runSharedQuery() {
+        //     window.location.href = '/?query=' + encodeURIComponent('${sharedText}');
+        // }
+
+        function handleSubmit(action) {
+            // Get the form element
+            var form = document.getElementById('myForm');
+
+            // Change the action attribute based on the button clicked
+            if (action === 'query') {
+                form.action = '/';
+            } else if (action === 'IGscript') {
+                form.action = '/';
+            } else if (action === 'EXPLscript') {
+                form.action = '/';
+            }
+        }
+
+        window.onload = function() {
+            fetchOwnedTableSchema();
+            fetchSharedTableSchema();
+        };
+
+        async function showTrend() {
+            document.getElementById('image-ig').style.display = "block";
+        }
+
+        async function showTrendExpl() {
+            document.getElementById('image-expl').style.display = "block";
+        }
+
+        function show() {
+            // e.preventDefault();
+            // if(e == 'ig') {
+                document.getElementById('image-ig').style.display = "block";
+                document.getElementById('IGscript').style.display = "none";                
+            // }
+        }
+            
+        function show2() {
+            // if(e == 'igexpl') {
+                document.getElementById('image-expl').style.display = "block";
+                document.getElementById('EXPLscript').style.display = "none";                
+            // }
+        }
+
+        document.getElementById('generateButtonIG').addEventListener('click', () => {
+      fetch('/generateGraphIG')
+        .then(response => {
+          if (response.ok) {
+            return response.blob();
+          }
+          throw new Error('Network response was not ok.');
+        })
+        .then(imageBlob => {
+          const imageUrl = URL.createObjectURL(imageBlob);
+          const imgElement = document.createElement('img');
+          imgElement.src = imageUrl;
+          document.getElementById('graphContainerIG').innerHTML = '';
+          document.getElementById('graphContainerIG').appendChild(imgElement);
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+    document.getElementById('generateButtonIGEXPL').addEventListener('click', () => {
+      fetch('/generateGraphIGEXPL')
+        .then(response => {
+          if (response.ok) {
+            return response.blob();
+          }
+          throw new Error('Network response was not ok.');
+        })
+        .then(imageBlob => {
+          const imageUrl = URL.createObjectURL(imageBlob);
+          const imgElement = document.createElement('img');
+          imgElement.src = imageUrl;
+          document.getElementById('graphContainerIGEXPL').innerHTML = '';
+          document.getElementById('graphContainerIGEXPL').appendChild(imgElement);
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+        // const showImageButton = document.getElementById("ig");
+        // const myImage = document.getElementById("image"); 
+        // showImageButton.addEventListener("click", () => { 
+        //     myImage.style.display = "block"; 
+        // });
+
+        // function submit()
+        // {
+        //     document.getElementById("generateGraphBtn").click(); // Simulates button click
+        //     document.submitForm.submit(); // Submits the form without the button
+        // }
+    </script>
+    <!-- The content generated by the server will be appended here -->
+</body>
+</html>
