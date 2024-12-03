@@ -1,0 +1,244 @@
+
+/* style.css */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    padding-bottom: 20px; /* Ensure space for the footer */
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 1em;
+}
+label {
+    font-family: Arial, sans-serif;
+    margin-right: 5px;
+}
+img{
+    width: 750px;
+    height: auto;
+
+}
+
+.container {
+    display: flex;
+}
+
+.pane {
+    flex: 1;
+    padding: 20px;
+}
+
+#pane1 {
+    background-color: #eee;
+}
+
+#pane2 {
+    background-color: #ddd;
+    display: flex;
+}
+
+.nested-panes {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.nested-pane {
+    flex: 1;
+    padding: 10px;
+}
+
+.table-box {
+    max-height: 300px; /* Set maximum height for the container */
+    overflow-y: auto; /* Enable vertical scrolling if content exceeds the container height */
+    border: 1px solid #ccc; /* Add a border for better visibility */
+    padding: 10px; /* Add padding for spacing */
+    margin: 20px; /* Add margin for spacing */
+}
+
+.table-container {
+    margin-bottom: 20px; /* Add some space between tables */
+}
+
+.table-container > h3 {
+    margin-top: 0; /* Remove default margin from h3 */
+}
+
+.table-container > div {
+    overflow-x: auto; /* Enable horizontal scrolling if needed */
+}
+
+
+
+#nestedPane1 {
+    background-color: #ccc;
+}
+
+#nestedPane2 {
+    background-color: #ccc;
+}
+
+main {
+    padding: 20px;
+    min-height: calc(100vh - 500px); /* Adjust height based on viewport height */
+    overflow-y: auto; /* Add scrollbar if content exceeds height */
+}
+
+footer {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 1em;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 60px; /* Reduce footer height */
+}
+
+#queryInput {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+#kInput {
+    width: 10%;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+#pricingOutput {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+#dataScheme {
+    margin-top: 20px;
+}
+
+#outputFrames {
+    display: none;
+    margin-top: 20px;
+}
+
+.outputFrame {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+#uploadDataSection {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+#dataUpload {
+    margin-top: 20px;
+}
+#igResultContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: left; /* Align items vertically in the middle */
+    align-items: left; /* Align items horizontally in the middle */
+  /*  padding: 50px;  Add padding to all sides */
+    margin-top: 0.25px;/* Adjust margin-top as needed */
+}
+.ig-result-title {
+    padding-left: 10px;
+    
+}
+
+
+
+/* Add the rest of your CSS rules here */
+
+/* style.css */
+
+/*body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 1em;
+}
+
+.container {
+    display: flex;
+}
+
+.pane {
+    flex: 1;
+    padding: 20px;
+}
+
+#pane1 {
+    background-color: #eee;
+}
+
+#pane2 {
+    background-color: #ddd;
+    display: flex;
+}
+
+.nested-panes {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.nested-pane {
+    flex: 1;
+    padding: 10px;
+}
+
+#nestedPane1 {
+    background-color: #ccc;
+}
+
+#nestedPane2 {
+    background-color: #bbb;
+}
+
+main {
+    padding: 20px;
+}
+
+footer {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 1em;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+
+input {
+    padding: 5px;
+    margin-right: 10px;
+}
+
+button {
+    padding: 5px 10px;
+    cursor: pointer;
+}*/
+
