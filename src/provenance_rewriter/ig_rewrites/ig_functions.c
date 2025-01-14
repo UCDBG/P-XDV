@@ -184,6 +184,9 @@ QueryOperator *cleanEXPL(QueryOperator *qo)
 	List *cleanExprs = NIL;
 	List *cleanNames = NIL;
 
+	List *valueR2 = NIL;
+	List *valueR2Names = NIL;
+
 	FOREACH(AttributeDef, a, qo->schema->attrDefs)
 	{
 
@@ -195,6 +198,13 @@ QueryOperator *cleanEXPL(QueryOperator *qo)
 		{
 			continue;
 		}
+		else if(isSuffix(a->attrName, "r2") && isPrefix(a->attrName, "value"))
+		{
+			AttributeReference *ar = createFullAttrReference(a->attrName, 0,
+					getAttrPos(qo, a->attrName), 0, a->dataType);
+			valueR2 = appendToTailOfList(valueR2, ar);
+			valueR2Names = appendToTailOfList(valueR2Names, a->attrName);
+		}
 		else
 		{
 			AttributeReference *ar = createFullAttrReference(a->attrName, 0,
@@ -204,8 +214,8 @@ QueryOperator *cleanEXPL(QueryOperator *qo)
 		}
 	}
 
-	ProjectionOperator *cleanpo = createProjectionOp(cleanExprs,
-			qo, NIL, cleanNames);
+	ProjectionOperator *cleanpo = createProjectionOp(CONCAT_LISTS(cleanExprs,valueR2),
+			qo, NIL, CONCAT_LISTS(cleanNames,valueR2Names));
 
 	addParent(qo, (QueryOperator *) cleanpo);
 	switchSubtrees(qo, (QueryOperator *) cleanpo);
