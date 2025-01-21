@@ -214,8 +214,10 @@ QueryOperator *cleanEXPL(QueryOperator *qo)
 		}
 	}
 
-	ProjectionOperator *cleanpo = createProjectionOp(CONCAT_LISTS(cleanExprs,valueR2),
-			qo, NIL, CONCAT_LISTS(cleanNames,valueR2Names));
+//	ProjectionOperator *cleanpo = createProjectionOp(CONCAT_LISTS(cleanExprs,valueR2),
+//			qo, NIL, CONCAT_LISTS(cleanNames,valueR2Names));
+
+	ProjectionOperator *cleanpo = createProjectionOp(cleanExprs, qo, NIL, cleanNames);
 
 	addParent(qo, (QueryOperator *) cleanpo);
 	switchSubtrees(qo, (QueryOperator *) cleanpo);
