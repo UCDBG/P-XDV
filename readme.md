@@ -1,7 +1,14 @@
 # PEDS Overview
 
-**PEDS** is a framework that allows users to estimate the price of data shared between buyers and sellers and generate explanations of the estimated price. It is an extension of GProM (https://github.com/IITDBGroup/gprom) that adds provenance support for complex queries on relational database systems. Provenance is information about how a query's result was produced over several database operations. That is, for a row in a table returned by a query we capture from which rows it was derived from the input table and by which operations. PEDS builds on the capabilities of GProM to rewrite input queries into rewritten queries for more complex actions. PEDS captures where and how provenance through annotations and their respective columns along with calculating a distance metric between two tuples during integration of data. PEDS also provides meaningful top-*k* patterns as an explanation that are extracted based on various metrics determining the pattern's contribution to the estimated price. 
-
+**PEDS** is a framework that allows users to estimate the price of data shared between buyers and sellers based on provenance and generate explanations of the estimated price. 
+Provenance is information about how a query's result was produced based on the given input data and a query containing several database operations. 
+<!-- That is, for a row in a table returned by a query we capture from which rows it was derived from the input table and by which operations.  -->
+<!-- PEDS builds on the capabilities of GProM to rewrite input queries into rewritten queries for more complex actions.  -->
+Various provenance types provide different level of information.
+PEDS captures where and how provenance to computed the value of shared data at a fine-grained level.
+<!-- through annotations and their respective columns along with calculating a distance metric between two tuples during integration of data.  -->
+The system follows the capabilities of other systems such as GProM that relay on query instrumentation techniques for capturing provenance. 
+PEDS also provides meaningful top-*k* patterns as an explanation that are extracted based on various metrics determining the pattern's contribution to the estimated price. 
 <!--For information about the research behind PEDS have a look at the link : https://scholar.google.com/citationsview_op=view_citation&hl=en&user=RzClsh8AAAAJ&citation_for_view=RzClsh8AAAAJ:roLk4NBRz8UC-->
 
 
