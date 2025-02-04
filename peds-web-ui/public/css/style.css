@@ -1,0 +1,164 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #eaeaea; /* Light gray background */
+}
+
+header {
+    background: #007BFF; /* Blue header */
+    color: #fff;
+    padding: 15px 0;
+    text-align: center;
+    border-radius: 5px;
+}
+
+main {
+    margin-top: 20px;
+}
+
+section {
+    background: #ffffff; /* White section background */
+    border: 1px solid #ccc; /* Light gray border */
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Slight shadow */
+    overflow: visible;
+    display: block;
+}
+
+section::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+h2 {
+    color: #0056b3; /* Darker blue for headings */
+    font-size: 1.5em; /* Larger heading */
+    border-bottom: 2px solid #007BFF; /* Underline */
+    padding-bottom: 10px; /* Spacing below heading */
+}
+
+button {
+    padding: 10px 20px; /* More padding */
+    color: #fff;
+    background-color: #28a745; /* Green button */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em; /* Font size */
+    margin-top: 10px; /* Space above buttons */
+    transition: background-color 0.3s; /* Transition effect */
+}
+
+button:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px; /* Space above table */
+}
+
+table, th, td {
+    border: 1px solid #ddd; /* Light border */
+}
+
+th, td {
+    padding: 10px; /* More padding */
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2; /* Light gray background for header */
+    color: #333; /* Dark text */
+}
+
+footer {
+    text-align: center;
+    margin-top: 20px;
+    padding: 10px 0;
+    background: #007BFF; /* Blue footer */
+    color: #fff;
+    border-radius: 5px;
+}
+
+.delete-btn-head {
+    width: 4px;
+    height: 4px;
+    line-height: 0px;
+    text-align: center;
+    font-size: 14px;
+    color: black;
+    border: none;
+    border-radius: 20%;
+    cursor: pointer;
+    padding: 15px;
+    background-color: #f2f2f2;
+  }
+
+
+  .delete-btn-head:hover {
+    background-color: darkred;
+  }
+
+  .delete-btn-row {
+    width: 4px;
+    height: 4px;
+    line-height: 0px;
+    text-align: center;
+    font-size: 14px;
+    color: black;
+    border: none;
+    border-radius: 20%;
+    cursor: pointer;
+    padding: 15px;
+    background-color: white;
+  }
+
+  .delete-btn-row:hover {
+    background-color: darkred;
+  }
+
+/* Table Schema Style */
+#tableSchema{
+    height: 800px;
+    /* overflow-y: scroll; */
+    border: 1px solid #ccc;
+    margin-top: 20px;
+    padding: 10px;
+}
+
+#tableSchema h3 {
+    color: #007BFF;
+    margin-bottom: 5px;
+}
+
+/* Style of schema it self */
+#tableSchema h2 {
+    color: #007BFF;
+    margin-bottom: 10px;
+}
+
+#tableSchema table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+#tableSchema th, #tableSchema td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+#tableSchema th {
+    background-color: #f4f4f4;
+    text-align: left;
+}
+
+.schema-container {
+    display: flex; 
+}

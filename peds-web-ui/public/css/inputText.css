@@ -1,0 +1,91 @@
+textarea {
+    width: 100%; /* Expands to fill available horizontal space */
+    min-height: 50px; /* Adjust height as needed */
+    resize: both; /* Allows users to resize */
+    overflow-wrap: break-word; /* Ensures text wraps inside */
+}
+
+/* Style for inpuy query */
+#queryInput {
+    width: 99%; /* Matches your inline style */
+    padding: 10px; /* Example: adds padding */
+    border: 2px solid #ccc; /* Example: adds a border */
+    border-radius: 5px; /* Example: rounded corners */
+    font-size: 16px; /* Example: adjusts text size */
+    outline: none; /* Removes default outline */
+}
+
+#queryInput:focus {
+    border-color: #007BFF; /* Change border color when focused */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add focus effect */
+}
+
+/* Style for estimate query */
+#estimateInput {
+    width: 70%; /* Matches your inline style */
+    padding: 10px; /* Example: adds padding */
+    border: 2px solid #ccc; /* Example: adds a border */
+    border-radius: 5px; /* Example: rounded corners */
+    font-size: 16px; /* Example: adjusts text size */
+    outline: none; /* Removes default outline */
+}
+
+#estimateInput:focus {
+    border-color: #007BFF; /* Change border color when focused */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add focus effect */
+}
+
+/* Style for EXPL query */
+#explInput {
+    width: 99%; /* Matches your inline style */
+    padding: 10px; /* Example: adds padding */
+    border: 2px solid #ccc; /* Example: adds a border */
+    border-radius: 5px; /* Example: rounded corners */
+    font-size: 16px; /* Example: adjusts text size */
+    outline: none; /* Removes default outline */   
+}
+
+#explInput:focus {
+    border-color: #007BFF; /* Change border color when focused */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add focus effect */
+}
+
+/* Style for kInput query */
+#kInput {
+    width: 70%; /* Matches your inline style */
+    padding: 10px; /* Example: adds padding */
+    border: 2px solid #ccc; /* Example: adds a border */
+    border-radius: 5px; /* Example: rounded corners */
+    font-size: 16px; /* Example: adjusts text size */
+    outline: none; /* Removes default outline */
+}
+
+#kInput:focus {
+    border-color: #007BFF; /* Change border color when focused */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add focus effect */
+}
+
+/* Style for start range and end range*/
+#startRange, #endRange {
+    width: 20%; /* Matches your inline style */
+    padding: 10px; /* Example: adds padding */
+    border: 2px solid #ccc; /* Example: adds a border */
+    border-radius: 5px; /* Example: rounded corners */
+    font-size: 16px; /* Example: adjusts text size */
+    outline: none; /* Removes default outline */
+}
+
+/* Style for tableNameInput */
+#tableNameInputOwned, #tableNameInputShared {
+    width: 30%; /* Matches your inline style */
+    padding: 10px; /* Example: adds padding */
+    border: 2px solid #ccc; /* Example: adds a border */
+    border-radius: 5px; /* Example: rounded corners */
+    font-size: 16px; /* Example: adjusts text size */
+    outline: none; /* Removes default outline */
+}
+
+#tableNameInputOwned:focus, #tableNameInputShared:focus {
+    border-color: #007BFF; /* Change border color when focused */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add focus effect */
+}
