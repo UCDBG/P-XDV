@@ -665,7 +665,18 @@ rewriteIG_HammingFunctions (ProjectionOperator *newProj)
 
         		}
         		else
+        		{
+        			if(isA(n,CaseExpr)) {
+
+        				CaseExpr *ce = (CaseExpr *) n;
+        				CaseWhen *cw = (CaseWhen *) getHeadOfListP(ce->whenClauses);
+        				Node *then = (Node *) cw->then;
+            			Node *castExpr = (Node *) createCastExpr(then, DT_BIT10);
+            			cw->then = castExpr;
+        			}
+
         	    	newProjExprs = appendToTailOfList(newProjExprs,n);
+        		}
     		}
 
         	// apply case when for original ig columns
@@ -2513,6 +2524,15 @@ rewriteIG_Projection (ProjectionOperator *op)
 	ProjectionOperator *newProj1 = createProjectionOp(allExprs, NULL, NIL, allAttrs);
     addChildOperator((QueryOperator *) newProj1, (QueryOperator *) child);
     switchSubtrees((QueryOperator *) op, (QueryOperator *) newProj1);
+
+    // TODO: ig columns should be binary
+    FOREACH(AttributeDef, ad, newProj1->op.schema->attrDefs)
+    {
+    	if(isPrefix(ad->attrName,IG_PREFIX) && isSuffix(ad->attrName,INTEG_SUFFIX))
+    	{
+    		ad->dataType = DT_BIT10;
+    	}
+    }
 
     // TODO: coalesce becomes DT_STRING
     int pos = 0;
