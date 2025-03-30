@@ -37,9 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
 
             if (response.ok) {
-                displayIGQuery.innerHTML = `
-                    <h3>Script Output:</h3>
-                `;
+                // displayIGQuery.innerHTML = `
+                //     <h3>Result:</h3>
+                // `;
                 const rawData = result.output;
                 const { headers, data } = processData(rawData);
 
@@ -181,6 +181,7 @@ let currentStartRange = 1; // Tracks the starting range for x-axis labels
 let myChart = null;
 function createBarGraph(filteredAttributes, fullDataset, startRange) {
     const ctx = document.getElementById("myChart1").getContext("2d");
+    // ctx.height = 50;
 
     // Filter dataset for selected attributes
     const filteredData = fullDataset.map(row => {
@@ -244,6 +245,7 @@ function createBarGraph(filteredAttributes, fullDataset, startRange) {
                 },
             },
         },
+        height: 50
     };
 
     // Destroy existing chart instance, if any

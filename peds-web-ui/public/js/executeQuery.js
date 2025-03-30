@@ -26,9 +26,13 @@ document.addEventListener('DOMContentLoaded', () => {
         window.estInput = document.getElementById('estimateInput');
         window.estInput.placeholder = igQuery;
 
+        // query = `SELECT o.pid, CASE WHEN(o.uniformityofcellsize >= 5 AND s.clumpthickness >= 5) THEN 1 ELSE o.risklevel END AS risklevel FROM cancer_owned o JOIN cancer_shared s ON (o.pid = s.pid)`;
         window.explQuery = `IGEXPL TOP ${kInput} OF(${query});`; //creating explQuery here
         window.explInput = document.getElementById('explInput');
-        window.explInput.placeholder = explQuery;
+
+        displayquery = `IGEXPL TO ${kInput} OF (SELECT o.pid, CASE WHEN(o.uniformityofcellsize >= 5 AND s.clumpthickness >= 5) THEN 1 ELSE o.risklevel END AS risklevel FROM cancer_owned o JOIN cancer_shared s ON (o.pid = s.pid))`;
+        window.explInput.placeholder = displayquery;
+        // window.explInput.placeholder = explQuery;
 
         if (!query) {
             displayInputQuery.innerHTML = '<p style="color: red;">Please enter a SQL query!</p>';
@@ -45,9 +49,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
 
             if (response.ok) {
-                displayInputQuery.innerHTML = `
-                    <h3>Script Output:</h3>
-                `;
+                // displayInputQuery.innerHTML = `
+                //     <h3>Result:</h3>
+                // `;
                 const rawData = result.output;
                 const { headers, data } = processInputData(rawData);
 

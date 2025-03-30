@@ -10,9 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
         explDiv.style.display = "block";
         // Grab the query from Step 2
         const query = queryInput.value.trim();
-        window.explQuery = `IGEXPL TOP ${kInput} OF(${query});`; //creating explQuery here
-        window.explInput = document.getElementById('explInput');
-        window.explInput.placeholder = explQuery;
+        // window.explQuery = `IGEXPL TOP ${kInput} OF(${query});`; //creating explQuery here
+        // window.explInput = document.getElementById('explInput');
+        // window.explInput.placeholder = explQuery;
         if (!query) {
             displayexplQuery.innerHTML = '<p style="color: red;">No query provided from Step 2.</p>';
             return;
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Display the result
             if (response.ok) {
                 displayexplQuery.innerHTML = `
-                    <h3>EXPL Script Output:</h3>
+                    <h3>Pattern-based Explanations:</h3>
                 `;
                 const rawData = result.output;
                 const { headers, data } = processExplData(rawData);

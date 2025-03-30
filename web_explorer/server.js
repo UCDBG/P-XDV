@@ -12,10 +12,10 @@ const port = 3000;
 // Setup PostgreSQL client
 const client = new Client({
     host: "localhost",
-    user: "postgres",
-    port: 5500,
-    password: "rootUser",
-    database: "postgres"
+    user: "shek21",
+    port: 5432,
+    password: "Ej09sk13!",
+    database: "shek21"
 });
 
 // Connect to the PostgreSQL server
