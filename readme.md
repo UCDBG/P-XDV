@@ -8,6 +8,7 @@
 
 
 # Simple Demo
+You will also need to create 2 new functions namely hammingxor and hammingxorvalue in postgres. The code for those functions are porvided in createTable.sql file.
 To run a simple PEDS sinerio, you can write a command in the following format:
 + to estimate the price
   + ./scripts/eig_run.sh ${log_level} "IG OF (${query});"
