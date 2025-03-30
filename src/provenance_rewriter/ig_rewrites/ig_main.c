@@ -2648,7 +2648,63 @@ rewriteIG_Projection (ProjectionOperator *op)
 		//do not use it with AggregationOperator
 		QueryOperator *cleanqo = cleanEXPL((QueryOperator *) analysis);
 
-		return cleanqo;
+		ProjectionOperator *po = (ProjectionOperator *) cleanqo;
+		List *newProjExprs = NIL;
+		List *newAttrs = NIL;
+
+		FOREACH(AttributeReference, ar, po->projExprs)
+		{
+			AttributeReference *newAr = NULL;
+
+			if(streq(ar->name, PATTERN_IG) || streq(ar->name, "mean_r2") ||
+					streq(ar->name, COVERAGE) || streq(ar->name, INFORMATIVENESS))
+			{
+				char *newArName = NULL;
+
+				if(streq(ar->name, PATTERN_IG))
+					newArName = "imp";
+
+				if(streq(ar->name, "mean_r2"))
+					newArName = "corr";
+
+				if(streq(ar->name, COVERAGE))
+					newArName = "cov";
+
+				if(streq(ar->name, INFORMATIVENESS))
+					newArName = "info";
+
+				newAr = createFullAttrReference(ar->name, 0,
+						getAttrPos(cleanqo, ar->name), 0, ar->attrType);
+				newAttrs = appendToTailOfList(newAttrs, newArName);
+			}
+			else
+			{
+				newAr = createFullAttrReference(ar->name, 0,
+						getAttrPos(cleanqo, ar->name), 0, ar->attrType);
+				newAttrs = appendToTailOfList(newAttrs, ar->name);
+			}
+
+			newProjExprs = appendToTailOfList(newProjExprs, newAr);
+		}
+
+		// TODO: Total impact and total provenance
+		Node *totImp = (Node *) createConstInt(1805);
+		char *totImpName = "totImp";
+
+		Node *totProv = (Node *) createConstInt(683);
+		char *totProvName = "totProv";
+
+		List *tot = LIST_MAKE(totImp, totProv);
+		List *totNames = LIST_MAKE(totImpName, totProvName);
+
+		newProjExprs = CONCAT_LISTS(newProjExprs, tot);
+		newAttrs = CONCAT_LISTS(newAttrs, totNames);
+
+		ProjectionOperator *finalpo = createProjectionOp(newProjExprs, NULL, NIL, newAttrs);
+		addChildOperator((QueryOperator *) finalpo, (QueryOperator *) cleanqo);
+		switchSubtrees((QueryOperator *) cleanqo, (QueryOperator *) finalpo);
+
+		return (QueryOperator *) finalpo;
 	}
 }
 

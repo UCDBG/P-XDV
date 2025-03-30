@@ -190,7 +190,7 @@ QueryOperator *cleanEXPL(QueryOperator *qo)
 	FOREACH(AttributeDef, a, qo->schema->attrDefs)
 	{
 
-		if(streq(a->attrName, "fscoreTopK"))
+		if(streq(a->attrName, "fscoreTopK") || streq(a->attrName, "f_score"))
 		{
 			continue;
 		}
