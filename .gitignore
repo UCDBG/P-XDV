@@ -65,3 +65,5 @@ GTAGS
 .ccls-cache
 /src/.project
 .cache
+peds-web-ui/node_modules/
+web_explorer/node_modules/
