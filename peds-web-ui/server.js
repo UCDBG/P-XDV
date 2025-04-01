@@ -12,21 +12,16 @@ const app = express();
 const port = 3000;
 
 // Setup PostgreSQL client
-// const client = new Client({
-//     host: "localhost",
-//     user: "postgres",
-//     port: 5500,
-//     password: "rootUser",
-//     database: "postgres"
-// });
-
 const client = new Client({
     host: "localhost",
     user: "postgres",
-    port: 5432,
-    password: "shemon90",
+    port: 5500,
+    password: "rootUser",
     database: "postgres"
 });
+
+const scriptPath = '/Users/shek21/ResearchApps/gprom-ig/scripts/eig_run.sh';
+
 
 // Connect to the PostgreSQL server
 client.connect();
@@ -304,7 +299,7 @@ app.get('/schemaShared', async (req, res) => {
 
 app.post('/execute-query', async (req, res) => {
         const { query } = req.body;
-        const scriptPath = '/Users/shemraw/Downloads/gprom/scripts/eig_run.sh';
+        // const scriptPath = '/Users/shek21/ResearchApps/gprom-ig/scripts/eig_run.sh';
 
         if (!query) {
             return res.status(400).json({ error: 'No query provided' });
@@ -346,7 +341,7 @@ app.post('/execute-query', async (req, res) => {
 app.post('/estimate-price', (req, res) => {
     console.log("inside /estimate-price");
     const { query } = req.body;
-    const scriptPath = '/Users/shemraw/Downloads/gprom/scripts/eig_run.sh';
+    // const scriptPath = '/Users/shemraw/Downloads/gprom/scripts/eig_run.sh';
     if (!query) {
         return res.status(400).json({ error: 'No query provided' });
     }
@@ -358,7 +353,9 @@ app.post('/estimate-price', (req, res) => {
     // Execute the script
     // const scriptProcess = spawn(script, ['0', `"IG OF (${query});"]);
     // ./scripts/eig_run.sh 3 “IG OF (SELECT * from owned o FULL OUTER JOIN shared s ON (o.county = s.county AND o.year = s.year));”
-    const scriptProcess = spawn(scriptPath, ['0', `IG OF(${query});`]);
+
+    const tempquery = `SELECT o.pid, o.uniformityofcellsize, o.uniformityofcellshape, s.clumpthickness, s.class, CASE WHEN(o.uniformityofcellsize >= 5 AND s.clumpthickness >= 5) THEN 1 ELSE o.risklevel END AS risklevel FROM cancer_owned o JOIN cancer_shared s ON (o.pid = s.pid)`;
+    const scriptProcess = spawn(scriptPath, ['0', `IG OF(${tempquery});`]);
     let output = '';
     let errorOutput = '';
 
@@ -391,14 +388,15 @@ app.post('/estimate-price', (req, res) => {
 app.post('/expl-peds', (req, res) => {
     console.log("inside /expl-peds");
     const { query,kInput } = req.body;
-    const scriptPath = '/Users/shemraw/Downloads/gprom/scripts/eig_run.sh';
+    // const scriptPath = '/Users/shemraw/Downloads/gprom/scripts/eig_run.sh';
     if (!query) {
         return res.status(400).json({ error: 'No query provided' });
     }
 
     // Execute the script
     console.log("kInput from server.js", kInput);
-    const scriptProcess = spawn(scriptPath, ['0', `IGEXPL TOP ${kInput} OF(${query});`]);
+    const tempquery = `SELECT o.pid, o.uniformityofcellsize, o.uniformityofcellshape, s.clumpthickness, s.class, CASE WHEN(o.uniformityofcellsize >= 5 AND s.clumpthickness >= 5) THEN 1 ELSE o.risklevel END AS risklevel FROM cancer_owned o JOIN cancer_shared s ON (o.pid = s.pid)`;
+    const scriptProcess = spawn(scriptPath, ['0', `IGEXPL TOP ${kInput} OF(${tempquery});`]);
     console.log("new script spawn", scriptProcess);
     let output = '';
     let errorOutput = '';
