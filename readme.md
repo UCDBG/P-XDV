@@ -1,6 +1,6 @@
-# PEDS Overview
+# P-XDV Overview
 
-**PEDS** is a framework that allows users to estimate the price of data shared between buyers and sellers based on provenance and generate explanations of the estimated price. Provenance is information about how a query's result was produced based on the given input data and a query containing several database operations. Various provenance types provide different level of information. PEDS captures where and how provenance to computed the value of shared data at a fine-grained level. The system follows the capabilities of other systems such as GProM that relay on query instrumentation techniques for capturing provenance. PEDS also provides meaningful top-*k* patterns as an explanation that are extracted based on various metrics determining the pattern's contribution to the estimated price. 
+**P-XDV** is a framework that allows users to estimate the price of data shared between buyers and sellers based on provenance and generate explanations of the estimated price. Provenance is information about how a query's result was produced based on the given input data and a query containing several database operations. Various provenance types provide different level of information. P-XDV captures where and how provenance to computed the value of shared data at a fine-grained level. The system follows the capabilities of other systems such as GProM that relay on query instrumentation techniques for capturing provenance. P-XDV also provides meaningful top-*k* patterns as an explanation that are extracted based on various metrics determining the pattern's contribution to the estimated price. 
 <!-- That is, for a row in a table returned by a query we capture from which rows it was derived from the input table and by which operations.  -->
 <!-- through annotations and their respective columns along with calculating a distance metric between two tuples during integration of data.  -->
 <!-- PEDS builds on the capabilities of GProM to rewrite input queries into rewritten queries for more complex actions.  -->
@@ -9,7 +9,7 @@
 
 # Simple Demo
 You will also need to create 2 new functions namely hammingxor and hammingxorvalue in postgres. The code for those functions are porvided in createTable.sql file.
-To run a simple PEDS sinerio, you can write a command in the following format:
+To run a simple P-XDV sinerio, you can write a command in the following format:
 + to estimate the price
   + ./scripts/eig_run.sh ${log_level} "IG OF (${query});"
   + Example: ./scripts/eig_run.sh 3 "IG OF (select * from owned o FULL OUTER JOIN shared s ON(o.county = s.county AND o.year = s.year));"
@@ -18,7 +18,7 @@ To run a simple PEDS sinerio, you can write a command in the following format:
   + Example: ./scripts/eig_run.sh 3 "IGEXPL TOP 10 OF (select * from owned o FULL OUTER JOIN shared s ON(o.county = s.county AND o.year = s.year));"
 
 Below, we show sample data from a real-world Air Quality Index dataset(AQI) for the example queries above.
-This demo shows a simple sinerio to familiarize the users with two of PEDS functionality. 
+This demo shows a simple sinerio to familiarize the users with two of P-XDV functionality. 
 + (i)  That computed the degree of new information and
 + (ii) That shows meaningful patterns found after integration step.
 
@@ -92,7 +92,7 @@ output for second command. Shows the best patterns and the f_score based on whic
 
 # Usage #
 
-To use **PEDS**, you will just need to install gprom, the interactive shell of GProM, you will need to have one of the supported backend databases installed. For casual use cases, you can stick to SQLite. However, to fully exploit the features of GProM, you should use Oracle. We also provide several docker containers with gprom preinstalled (see [here](https://github.com/IITDBGroup/gprom/wiki/docker)) When starting gprom, you have to specify connection parameters to the database. For example, using one of the convenience wrapper scripts that ship with GProM, you can connected to a test SQLite database included in the repository by running the following command in the main source folder after installation:
+To use **P-XDV**, you will just need to install gprom, the interactive shell of GProM, you will need to have one of the supported backend databases installed. For casual use cases, you can stick to SQLite. However, to fully exploit the features of GProM, you should use Oracle. We also provide several docker containers with gprom preinstalled (see [here](https://github.com/IITDBGroup/gprom/wiki/docker)) When starting gprom, you have to specify connection parameters to the database. For example, using one of the convenience wrapper scripts that ship with GProM, you can connected to a test SQLite database included in the repository by running the following command in the main source folder after installation:
 
 ```
 gprom -backend sqlite -db ./examples/test.db
@@ -136,7 +136,7 @@ Provenance for SQL queries is only one of the features supported by GProM. A ful
 
 # Installation
 
-PEDS installation follows the installation of GProM. The [wiki](https://github.com/IITDBGroup/gprom/wiki/installation) has detailed installation instructions. <!--In a nutshell, GProM can be compiled with support for different database backends and is linked against the C client libraries of these database backends.--> The installation follows the standard procedure using GNU build tools. Checkout the git repository, install all dependencies and run:
+P-XDV installation follows the installation of GProM. The [wiki](https://github.com/IITDBGroup/gprom/wiki/installation) has detailed installation instructions. <!--In a nutshell, GProM can be compiled with support for different database backends and is linked against the C client libraries of these database backends.--> The installation follows the standard procedure using GNU build tools. Checkout the git repository, install all dependencies and run:
 
 ```
 ./autogen.sh
@@ -148,5 +148,5 @@ sudo make install
 <!--
 # Research and Background
 
-PEDS builds on GProM and the functionality of GProM is based on a long term research effort by the [IIT DBGroup](http://www.cs.iit.edu/~dbgroup/) studying how to capture provenance on-demand using instrumentation. Links to [publications](http://www.cs.iit.edu/~dbgroup/publications) and more research oriented descriptions of the techniques implemented in GProM can be found at [http://www.cs.iit.edu/~dbgroup/research](http://www.cs.iit.edu/~dbgroup/research).
+P-XDV builds on GProM and the functionality of GProM is based on a long term research effort by the [IIT DBGroup](http://www.cs.iit.edu/~dbgroup/) studying how to capture provenance on-demand using instrumentation. Links to [publications](http://www.cs.iit.edu/~dbgroup/publications) and more research oriented descriptions of the techniques implemented in GProM can be found at [http://www.cs.iit.edu/~dbgroup/research](http://www.cs.iit.edu/~dbgroup/research).
 -->
