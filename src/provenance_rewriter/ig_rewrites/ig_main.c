@@ -3177,14 +3177,15 @@ rewriteIG_TableAccess(TableAccessOperator *op)
 
 	//cleanL and cleanR contains input query attributes without duplicates
 	//removing those attributes from projExpr so i can duplicate them to create ig_ attributes
+	//tablePos = 0 = Left = Owned
 	List *newProjExpr = NIL;
 	List *newProjNames = NIL;
 	if(tablePos == 0)
 	{
 		newProjExpr = NIL;
 		newProjNames = NIL;
-		FOREACH(AttributeReference, ar, cleanL)
-		{
+//		FOREACH(AttributeReference, ar, cleanL)  // old logic loop
+//		{
 			//removing the join condition attributes
 //			if(searchArList(joinattrs, ar->name) == 1)
 //			{
@@ -3196,26 +3197,37 @@ rewriteIG_TableAccess(TableAccessOperator *op)
 //				continue;
 //			}
 //			else
-			if((searchArList(joinattrs, ar->name) == 0)
-					&& (searchArList(cleanR, ar->name) == 1))
-//			if((!searchListNode(joinattrs, (Node *) ar))
-//					&& (searchListNode(cleanR, (Node *) ar)))
-			{
-				newProjExpr = appendToTailOfList(newProjExpr, ar);
-				newProjNames = appendToTailOfList(newProjNames, ar->name);
+			// adding new logic where we need to add all the attributes from the left table
+			// becasue we need to track owned table
+
+			FOREACH(AttributeDef, adef, left_attrs){
+				newProjExpr = appendToTailOfList(newProjExpr, createFullAttrReference(adef->attrName, 0,
+								getAttrPos((QueryOperator *) op, adef->attrName), 0, adef->dataType));
+
+				newProjNames = appendToTailOfList(newProjNames, adef->attrName);
 			}
-		}
+
+			//old logic
+//			if((searchArList(joinattrs, ar->name) == 0)
+//					&& (searchArList(cleanR, ar->name) == 1))
+//			{
+//				newProjExpr = appendToTailOfList(newProjExpr, ar);
+//				newProjNames = appendToTailOfList(newProjNames, ar->name);
+//			}
+//		} old logic end loop
 
 		//adding case attributes to input here, NOTE: We only need then and else attributes here
-		FOREACH(AttributeReference, ar , thenElseAttrs)
-		{
-			if(ar->attrPosition < left_len) // creating left list
-			{
-				newProjExpr = appendToTailOfList(newProjExpr, ar);
-				newProjNames = appendToTailOfList(newProjNames, ar->name);
-			}
-		}
+		// old logic for case when we don't need this anymore becasue we are adding everything from owned
+//		FOREACH(AttributeReference, ar , thenElseAttrs)
+//		{
+//			if(ar->attrPosition < left_len) // creating left list
+//			{
+//				newProjExpr = appendToTailOfList(newProjExpr, ar);
+//				newProjNames = appendToTailOfList(newProjNames, ar->name);
+//			}
+//		}
 	}
+	//tablePos=1 = right = shared
 	else if(tablePos == 1)
 	{
 		newProjExpr = NIL;
