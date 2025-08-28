@@ -10,6 +10,74 @@
  *-----------------------------------------------------------------------------
  */
 
+
+/***** P-XDV Multi-Source IG Roadmap (Order-Independent, N-way Joins) *************************
+ * Problem with current approach:
+ *   - Uses traversal order (tablePos==0/1) to infer semantics (owned vs. shared).
+ *   - Breaks under join reordering and does not scale beyond two sources.
+ *
+ * Core idea:
+ *   Tag each base relation with a semantic SourceTag, name IG columns per source, and pair
+ *   attributes via a per-attr/per-source map (owned set vs. each shared set).
+ *
+ * 1) Tag base relations (set as a property on each TableAccess)
+ *
+ *     typedef enum { SRC_OWNED = 0, SRC_SHARED = 1 } SourceRole;
+ *     typedef struct SourceTag {
+ *       char *relName;   // e.g., "aqi_a"
+ *       char *alias;     // e.g., "o", "s1" (if any)
+ *       SourceRole role; // OWNED or SHARED
+ *       int index;       // 0..N-1 within its role (o0, o1, s0, s1, ...)
+ *     } SourceTag;
+ *
+ *     // Property key to attach on TableAccess ops:
+ *     //   SET_STRING_PROP(tableAccessOp, IG_SOURCE_TAG, sourceTagPtr);
+ *     // Role/index can be inferred from alias/schema or from a CLI/config map.
+ *
+ * 2) Stable per-source key + IG naming
+ *
+ *     static inline char *srcKey(const SourceTag *t) {
+ *       return (t->role == SRC_OWNED) ? psprintf("o%d", t->index) : psprintf("s%d", t->index);
+ *     }
+ *
+ *     // IG conversion columns:
+ *     //   ig_conv_<srcKey>_<attr>   e.g., ig_conv_o0_maqi, ig_conv_s1_gdays
+ *
+ * 3) Collect a per-attribute/per-source registry after children are rewritten
+ *
+ *     // Map: attrName -> (srcKey -> AttributeReference*)
+ *     // e.g., igByAttr["maqi"]["o0"] = ref(ig_conv_o0_maqi)
+ *     //       igByAttr["maqi"]["s0"] = ref(ig_conv_s0_maqi)
+ *     // Attach as a property on the Projection or build transiently in rewriteIG_HammingFunctions.
+ *
+ * 4) Hamming pairing (generalized)
+ *
+ *     // For each attr A:
+ *     //   for each owned source Ok in OWNED:
+ *     //     for each shared source Sj in SHARED:
+ *     //       if both exist: hammingxor(ig_conv_Ok_A_integ, ig_conv_Sj_A_integ)
+ *     //       else: compare existing side vs "0000000000"
+ *     //
+ *     // Emit value_*IG_* per (A, Sj) (or per (A, Ok,Sj) if you want full matrix).
+ *
+ * 5) Outer-join join-keys (generalized)
+ *
+ *     // Ensure ig_conv_<srcKey>_<joinKey> exists for every source where the key appears.
+ *     // No special left/right casing—pairing is handled by the registry.
+ *
+ * 6) Back-compat option
+ *
+ *     // If exactly one OWNED and one SHARED exist, optionally alias:
+ *     //   ig_conv_left_*  -> ig_conv_o0_*
+ *     //   ig_conv_right_* -> ig_conv_s0_*
+ *
+ * Implementation touchpoints (future):
+ *   - Replace tablePos branches in rewriteIG_TableAccess with SourceTag.role/index.
+ *   - Emit ig_conv_<srcKey>_* names instead of left/right.
+ *   - Build igByAttr in rewriteIG_Projection (or inside rewriteIG_HammingFunctions).
+ *   - Update hamming/value/Total_IG builders to iterate over igByAttr.
+ ************************************************************************************************/
+
 #include "configuration/option.h"
 #include "instrumentation/timing_instrumentation.h"
 #include "provenance_rewriter/pi_cs_rewrites/pi_cs_main.h"
