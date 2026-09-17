@@ -1405,40 +1405,9 @@ rewriteIG_HammingFunctions (ProjectionOperator *newProj)
 					igAttrL = appendToTailOfList(igAttrL, arl);
 				}
 			}
-
-//			if (isSubstr(n->attrName, "left") && !isSuffix(n->attrName, INTEG_SUFFIX)
-////					&& isSubstr(n->attrName, "right") == FALSE
-//			)
-//			{
-//				FOREACH(AttributeReference, ar, origAttrs)
-//				{
-//					if(isSubstr(n->attrName, ar->name) == TRUE)
-//					{
-//						AttributeReference *ar = getAttrRefByName((QueryOperator *) newProj, n->attrName);
-//						igAttrL = appendToTailOfList(igAttrL, ar);
-//					}
-//				}
-//			}
-//
-//			if (isSubstr(n->attrName, "integ") == TRUE)
-//			{
-//				FOREACH(AttributeReference, ar, origAttrs)
-//				{
-//					if(isSubstr(n->attrName, ar->name) == TRUE)
-//					{
-//						AttributeReference *arn = getAttrRefByName((QueryOperator *) newProj, n->attrName);
-//						cleanigAttrR = appendToTailOfList(cleanigAttrR, arn);
-//					}
-//				}
-//			}
 		}
 	}
 
-//	List *igAttrR = removeDupeAr(cleanigAttrR);
-//	int LL = LIST_LENGTH(igAttrL);
-//	int RR = LIST_LENGTH(igAttrR);
-//	int lend = 1;
-//	int rend = 1;
 
 	// 1. hamming function for all same/common attributes first
 	// 2. renaming the attribute names || Keeping the table Names for now
